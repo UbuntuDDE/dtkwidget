@@ -1,0 +1,31 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+build*/
+*.pro.user*
+*.DS_Store
+
+# executeable files
+*.qm
+
+src/DtkWidgets
+src/dtkwidget_config.h
+cmake/DtkWidget/DtkWidgetConfig.cmake
+src/qt_lib_dtk*.pri
+
+# misc
+.vscode/
+
+# cmake files
+cmake/*
