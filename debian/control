@@ -1,47 +1,102 @@
 Source: dtkwidget
-Section: libdevel
+Section: libs
 Priority: optional
-Maintainer: Deepin Packages Builder <packages@deepin.com>
-Build-Depends: debhelper (>= 9), pkg-config, libudev-dev,
- libqt5x11extras5-dev, libxext-dev, qttools5-dev-tools,
- x11proto-xext-dev, libxcb-util0-dev, libstartup-notification0-dev,
- libmtdev-dev, qtbase5-private-dev, libegl1-mesa-dev, libudev-dev,
- libfontconfig1-dev, libfreetype6-dev, libglib2.0-dev, libxrender-dev,
- libdtkcore-dev, libgsettings-qt-dev, libqt5svg5-dev, libxi-dev,
- libdtkgui-dev, libcups2-dev, libgtest-dev
-Standards-Version: 3.9.8
+Maintainer: Arun Kumar Pariyar <openarungeek@gmail.com>
+XSBC-Original-Maintainer: Debian Deepin Packaging Team <pkg-deepin-devel@lists.alioth.debian.org>
+Uploaders:
+ Boyuan Yang <byang@debian.org>,
+ Yanhao Mo <yanhaocs@gmail.com>,
+ SZ Lin (林上智) <szlin@debian.org>,
+ Arun Kumar Pariyar <openarungeek@gmail.com>,
+Build-Depends:
+ debhelper-compat (= 13),
+ libcups2-dev,
+ libdframeworkdbus-dev (>= 1.0~),
+ libdtkcore-dev (>= 5.4.20~),
+ libdtkgui-dev (>=5.4.15~),
+ libegl1-mesa-dev,
+ libfontconfig1-dev,
+ libfreetype6-dev,
+ libglib2.0-dev,
+ libgsettings-qt-dev,
+ libmtdev-dev,
+ libpulse-dev,
+ libqt5svg5-dev,
+ libqt5x11extras5-dev,
+ librsvg2-dev,
+ libstartup-notification0-dev,
+ libudev-dev,
+ libxcb-util0-dev,
+ libxext-dev,
+ libxi-dev,
+ libxrender-dev,
+ pkg-config,
+ pkg-kde-tools,
+ qtbase5-dev,
+ qtbase5-private-dev,
+ qttools5-dev-tools,
+ libgtest-dev,
+ x11proto-xext-dev,
+Rules-Requires-Root: no
+Standards-Version: 4.5.0
+Homepage: https://github.com/linuxdeepin/dtkwidget
+Vcs-Git: https://salsa.debian.org/pkg-deepin-team/dtkwidget.git
+Vcs-Browser: https://salsa.debian.org/pkg-deepin-team/dtkwidget
+
+Package: libdtkwidget-dev
+Architecture: any
+Section: libdevel
+Depends:
+ libdtkcore-dev,
+ libdtkgui-dev,
+ libdtkwidget5 (= ${binary:Version}),
+ libqt5x11extras5-dev,
+ libqt5svg5-dev,
+ libcups2-dev,
+ ${misc:Depends},
+Multi-Arch: same
+Description: Deepin Tool Kit Widget library (development files)
+ DtkWidget is the Deepin graphical user interface library for deepin
+ desktop development.
+ .
+ This package is part of DDE (Deepin Desktop Environment).
+ .
+ This package contains the header files and static libraries which are
+ needed for developing Deepin application.
 
 Package: libdtkwidget5
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libdtkcommon
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ libdtkcommon,
 Multi-Arch: same
-Description: Deepin graphical user interface library
- DtkWidget is Deepin graphical user interface for deepin desktop development.
+Description: Deepin Tool Kit Widget library
+ DtkWidget is the Deepin graphical user interface library for deepin
+ desktop development.
+ .
+ This package is part of DDE (Deepin Desktop Environment).
  .
  This package contains the shared libraries.
 
 Package: libdtkwidget5-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
+Depends:
+ libdtkcore-dev,
  libdtkwidget5( =${binary:Version}),
- libqt5x11extras5-dev, libdtkcore-dev, libqt5svg5-dev
-Description: Deepin graphical user interface library utilities
- DtkWidget is Deepin graphical user interface for deepin desktop development.
+ libqt5svg5-dev,
+ libqt5x11extras5-dev,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Deepin Tool Kit Widget library utilities
+ DtkWidget is the Deepin graphical user interface library for deepin
+ desktop development.
  .
- This package contains the utilities which are
- needed for developing Deepin applications.
+ This package is part of DDE (Deepin Desktop Environment).
+ .
+ This package contains the utilities which are needed for developing
+ Deepin applications.
 
-Package: libdtkwidget-dev
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
- libdtkwidget5( =${binary:Version}),
- libqt5x11extras5-dev, libdtkcore-dev, libqt5svg5-dev,
- libdtkgui-dev, libcups2-dev
-Description: Deepin graphical user interface library
- DtkWidget is Deepin graphical user interface for deepin desktop development.
- .
- This package contains the header files and static libraries which are
- needed for developing Deepin applications.
 
 Package: dtkwidget5-examples
 Architecture: any
