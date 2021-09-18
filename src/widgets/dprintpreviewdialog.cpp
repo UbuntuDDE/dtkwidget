@@ -12,7 +12,7 @@
 #include "dspinbox.h"
 #include "dbackgroundgroup.h"
 #include "dfiledialog.h"
-#include "dapplicationhelper.h"
+#include "dpalettehelper.h"
 #include "dstyleoption.h"
 #include "dapplication.h"
 #include "dfilechooseredit.h"
@@ -120,9 +120,9 @@ void DPrintPreviewDialogPrivate::initui()
 
     mainWidget->setAutoFillBackground(true);
 
-    DPalette pa = DApplicationHelper::instance()->palette(titleWidget);
+    DPalette pa = DPaletteHelper::instance()->palette(titleWidget);
     pa.setBrush(DPalette::Background, pa.base());
-    DApplicationHelper::instance()->setPalette(titleWidget, pa);
+    DPaletteHelper::instance()->setPalette(titleWidget, pa);
     titleWidget->setAutoFillBackground(true);
 
     QHBoxLayout *mainlayout = new QHBoxLayout();
@@ -201,9 +201,9 @@ void DPrintPreviewDialogPrivate::initleft(QVBoxLayout *layout)
     QRegExpValidator *val = new QRegExpValidator(reg, jumpPageEdit);
     jumpPageEdit->lineEdit()->setValidator(val);
 
-    DPalette m_pa = DApplicationHelper::instance()->palette(pview);
+    DPalette m_pa = DPaletteHelper::instance()->palette(pview);
     m_pa.setBrush(DPalette::Base, m_pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(pview, m_pa);
+    DPaletteHelper::instance()->setPalette(pview, m_pa);
 }
 
 void DPrintPreviewDialogPrivate::initright(QVBoxLayout *layout)
@@ -382,9 +382,9 @@ void DPrintPreviewDialogPrivate::initbasicui()
     DBackgroundGroup *back = new DBackgroundGroup(orientationlayout);
     back->setObjectName("OrientationBackgroundGroup");
     back->setItemSpacing(2);
-    DPalette pa = DApplicationHelper::instance()->palette(back);
+    DPalette pa = DPaletteHelper::instance()->palette(back);
     pa.setBrush(DPalette::Base, pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(back, pa);
+    DPaletteHelper::instance()->setPalette(back, pa);
     layout->addWidget(back);
 }
 
@@ -467,7 +467,7 @@ void DPrintPreviewDialogPrivate::initadvanceui()
     marginslayout->addLayout(marginscombolayout);
     marginslayout->addLayout(marginsspinlayout);
 
-    QRegExp reg("^([5-5][0-4]|[1-4][0-9]|[0-9])?(\\.[0-9][0-9])|55(\\.[8-8][0-8])|55(\\.[0-7][0-9])");
+    QRegExp reg("^([5-5][0-4]|[1-4][0-9]|[0-9])(\\.[0-9][0-9])|55(\\.[8-8][0-8])|55(\\.[0-7][0-9])");
     QRegExpValidator *val = new QRegExpValidator(reg, marginsframe);
     QList<DDoubleSpinBox *> list = marginsframe->findChildren<DDoubleSpinBox *>();
     for (int i = 0; i < list.size(); i++) {
@@ -529,9 +529,9 @@ void DPrintPreviewDialogPrivate::initadvanceui()
     DBackgroundGroup *back = new DBackgroundGroup(scalingcontentlayout);
     back->setObjectName("ScalingContentBackgroundGroup");
     back->setItemSpacing(1);
-    DPalette pa = DApplicationHelper::instance()->palette(back);
+    DPalette pa = DPaletteHelper::instance()->palette(back);
     pa.setBrush(DPalette::Base, pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(back, pa);
+    DPaletteHelper::instance()->setPalette(back, pa);
     scalinglayout->addLayout(scalingtitlelayout);
     scalinglayout->addWidget(back);
 
@@ -674,9 +674,9 @@ void DPrintPreviewDialogPrivate::initadvanceui()
 
     DBackgroundGroup *backorder = new DBackgroundGroup(ordercontentlayout);
     backorder->setItemSpacing(1);
-    pa = DApplicationHelper::instance()->palette(backorder);
+    pa = DPaletteHelper::instance()->palette(backorder);
     pa.setBrush(DPalette::Base, pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(backorder, pa);
+    DPaletteHelper::instance()->setPalette(backorder, pa);
 
     orderlayout->addLayout(ordertitlelayout);
     orderlayout->addWidget(backorder);
@@ -863,9 +863,9 @@ void DPrintPreviewDialogPrivate::initWaterMarkui()
     vContentLayout->addWidget(sizeframe);
     vContentLayout->addWidget(opaframe);
 
-    DPalette pa = DApplicationHelper::instance()->palette(back);
+    DPalette pa = DPaletteHelper::instance()->palette(back);
     pa.setBrush(DPalette::Base, pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(back, pa);
+    DPaletteHelper::instance()->setPalette(back, pa);
     watermarksettingwdg->setLayout(vContentLayout);
 }
 
@@ -1066,7 +1066,7 @@ void DPrintPreviewDialogPrivate::initconnections()
         pview->setCurrentPage(jumpPageEdit->value());
         setTurnPageBtnStatus();
     });
-    QObject::connect(paperSizeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), q, [this](int index) {
+    QObject::connect(paperSizeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), q, [this](int) {
         QPrinterInfo prInfo(*printer);
         if (paperSizeCombo->count() == 0) {
             printer->setPageSize(QPrinter::A4);
@@ -1140,12 +1140,12 @@ void DPrintPreviewDialogPrivate::initconnections()
     QObject::connect(marginLeftSpin, SIGNAL(valueChanged(double)), q, SLOT(_q_marginspinChanged(double)));
     QObject::connect(marginBottomSpin, SIGNAL(valueChanged(double)), q, SLOT(_q_marginspinChanged(double)));
     QObject::connect(duplexCheckBox, SIGNAL(stateChanged(int)), q, SLOT(_q_checkStateChanged(int)));
-    QObject::connect(DApplicationHelper::instance(), &DApplicationHelper::themeTypeChanged, pview, &DPrintPreviewWidget::themeTypeChanged);
+    QObject::connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, pview, &DPrintPreviewWidget::themeTypeChanged);
     QObject::connect(marginTopSpin, SIGNAL(editingFinished()), q, SLOT(_q_marginEditFinished()));
     QObject::connect(marginRightSpin, SIGNAL(editingFinished()), q, SLOT(_q_marginEditFinished()));
     QObject::connect(marginLeftSpin, SIGNAL(editingFinished()), q, SLOT(_q_marginEditFinished()));
     QObject::connect(marginBottomSpin, SIGNAL(editingFinished()), q, SLOT(_q_marginEditFinished()));
-    QObject::connect(DApplicationHelper::instance(), &DApplicationHelper::themeTypeChanged, q, [this](DGuiApplicationHelper::ColorType themeType) { this->themeTypeChange(themeType); });
+    QObject::connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, q, [this](DGuiApplicationHelper::ColorType themeType) { this->themeTypeChange(themeType); });
     QObject::connect(marginTopSpin->lineEdit(), SIGNAL(textEdited(const QString &)), q, SLOT(_q_spinboxValueEmptyChecked(const QString &)));
     QObject::connect(marginRightSpin->lineEdit(), SIGNAL(textEdited(const QString &)), q, SLOT(_q_spinboxValueEmptyChecked(const QString &)));
     QObject::connect(marginLeftSpin->lineEdit(), SIGNAL(textEdited(const QString &)), q, SLOT(_q_spinboxValueEmptyChecked(const QString &)));
@@ -1159,9 +1159,9 @@ void DPrintPreviewDialogPrivate::initconnections()
 void DPrintPreviewDialogPrivate::setfrmaeback(DFrame *frame)
 {
     frame->setLineWidth(0);
-    DPalette pa = DApplicationHelper::instance()->palette(frame);
+    DPalette pa = DPaletteHelper::instance()->palette(frame);
     pa.setBrush(DPalette::Base, pa.itemBackground());
-    DApplicationHelper::instance()->setPalette(frame, pa);
+    DPaletteHelper::instance()->setPalette(frame, pa);
 }
 
 void DPrintPreviewDialogPrivate::showadvancesetting()
@@ -1358,9 +1358,9 @@ void DPrintPreviewDialogPrivate::themeTypeChange(DGuiApplicationHelper::ColorTyp
 {
     Q_Q(DPrintPreviewDialog);
     DWidget *titleWidget = q->findChild<DWidget *>("titlewidget");
-    DPalette m_pa = DApplicationHelper::instance()->palette(titleWidget);
+    DPalette m_pa = DPaletteHelper::instance()->palette(titleWidget);
     m_pa.setBrush(DPalette::Background, m_pa.base());
-    DApplicationHelper::instance()->setPalette(titleWidget, m_pa);
+    DPaletteHelper::instance()->setPalette(titleWidget, m_pa);
     titleWidget->setAutoFillBackground(true);
 
     QList<DFrame *> m_frameList = q->findChildren<DFrame *>();
@@ -1374,10 +1374,10 @@ void DPrintPreviewDialogPrivate::themeTypeChange(DGuiApplicationHelper::ColorTyp
     }
     pa.setBrush(DPalette::FrameBorder, pa.base());
     for (int i = 1; i < m_frameList.size(); i++) {
-        DApplicationHelper::instance()->setPalette(m_frameList.at(i), pa);
+        DPaletteHelper::instance()->setPalette(m_frameList.at(i), pa);
     }
-    for (int i = 1; i < m_back.size(); i++) {
-        DApplicationHelper::instance()->setPalette(m_back.at(i), pa);
+    for (int i = 0; i < m_back.size(); i++) {
+        DPaletteHelper::instance()->setPalette(m_back.at(i), pa);
     }
 }
 
@@ -1481,8 +1481,6 @@ void DPrintPreviewDialogPrivate::setTurnPageBtnStatus()
  */
 void DPrintPreviewDialogPrivate::watermarkTypeChoosed(int index)
 {
-    D_Q(DPrintPreviewDialog);
-
     if (index == 0) {
         pview->refreshBegin();
         waterTextCombo->setEnabled(true);
@@ -1502,7 +1500,8 @@ void DPrintPreviewDialogPrivate::watermarkTypeChoosed(int index)
             fontCombo->addItem(font);
         }
 
-        if (!q->property("_d_print_waterIsInit").toBool()) {
+        static bool watermarkIsInited = false;
+        if (!watermarkIsInited) {
             // 初始化才使用系统默认字体 下次切换时保留上一次字体
             //通过字体信息,当中文字体的情况下将英文转换为中文
             QFont font;
@@ -1514,7 +1513,7 @@ void DPrintPreviewDialogPrivate::watermarkTypeChoosed(int index)
                     fontCombo->setCurrentText(itemName);
                 }
             }
-            q->setProperty("_d_print_waterIsInit", true);
+            watermarkIsInited = true;
         }
         pview->setWaterMarkType(Type_Text);
         pview->refreshEnd();
@@ -2004,7 +2003,7 @@ void DPrintPreviewDialogPrivate::waterMarkBtnClicked(bool isClicked)
     if (isClicked) {
         wmSpacer->changeSize(WIDTH_NORMAL, SPACER_HEIGHT_HIDE);
         watermarksettingwdg->show();
-        waterTypeGroup->button(typeChoice)->setChecked(true);
+        waterTypeGroup->button(0)->setChecked(true);
         watermarkTypeChoosed(typeChoice);
         if (typeChoice == Type_Image - 1 && !picPathEdit->text().isEmpty())
             customPictureWatermarkChoosed(picPathEdit->text());

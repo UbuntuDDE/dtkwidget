@@ -32,6 +32,7 @@
 #include "dwindowmaxbutton.h"
 #include "dwindowminbutton.h"
 #include "dwindowoptionbutton.h"
+#include "dtabletwindowoptionbutton.h"
 #include "dwindowquitfullbutton.h"
 #include "dplatformwindowhandle.h"
 #include "daboutdialog.h"
@@ -98,7 +99,7 @@ private:
     DWindowMinButton    *minButton;
     DWindowMaxButton    *maxButton;
     DWindowCloseButton  *closeButton;
-    DWindowOptionButton *optionButton;
+    DIconButton         *optionButton;
     DWindowQuitFullButton *quitFullButton;
     DLabel              *titleLabel;
     QWidget             *customWidget = nullptr;
@@ -132,7 +133,9 @@ private:
     Q_DECLARE_PUBLIC(DTitlebar)
 };
 
-DTitlebarPrivate::DTitlebarPrivate(DTitlebar *qq): DObjectPrivate(qq)
+DTitlebarPrivate::DTitlebarPrivate(DTitlebar *qq)
+    : DObjectPrivate(qq)
+    , quitFullButton(nullptr)
 {
 }
 
@@ -152,8 +155,13 @@ void DTitlebarPrivate::init()
     minButton       = new DWindowMinButton;
     maxButton       = new DWindowMaxButton;
     closeButton     = new DWindowCloseButton;
-    optionButton    = new DWindowOptionButton;
-    quitFullButton  = new DWindowQuitFullButton;
+
+    if (DGuiApplicationHelper::isTabletEnvironment()) {
+        optionButton = new DTabletWindowOptionButton;
+    } else {
+        optionButton = new DWindowOptionButton;
+    }
+
     separatorTop    = new DHorizontalLine(q);
     separator       = new DHorizontalLine(q);
     titleLabel      = centerArea;
@@ -163,7 +171,6 @@ void DTitlebarPrivate::init()
     maxButton->installEventFilter(q);
     closeButton->installEventFilter(q);
     optionButton->installEventFilter(q);
-    quitFullButton->installEventFilter(q);
 
     optionButton->setObjectName("DTitlebarDWindowOptionButton");
     optionButton->setIconSize(QSize(DefaultTitlebarHeight, DefaultTitlebarHeight));
@@ -177,10 +184,7 @@ void DTitlebarPrivate::init()
     closeButton->setObjectName("DTitlebarDWindowCloseButton");
     closeButton->setAccessibleName("DTitlebarDWindowCloseButton");
     closeButton->setIconSize(QSize(DefaultTitlebarHeight, DefaultTitlebarHeight));
-    quitFullButton->setObjectName("DTitlebarDWindowQuitFullscreenButton");
-    quitFullButton->setAccessibleName("DTitlebarDWindowQuitFullscreenButton");
-    quitFullButton->setIconSize(QSize(DefaultTitlebarHeight, DefaultTitlebarHeight));
-    quitFullButton->hide();
+
 
     iconLabel->setIconSize(QSize(DefaultIconWidth, DefaultIconHeight));
     iconLabel->setWindowFlags(Qt::WindowTransparentForInput);
@@ -213,7 +217,15 @@ void DTitlebarPrivate::init()
     buttonLayout->addWidget(optionButton);
     buttonLayout->addWidget(minButton);
     buttonLayout->addWidget(maxButton);
-    buttonLayout->addWidget(quitFullButton);
+    if (!DGuiApplicationHelper::isTabletEnvironment()) {
+        quitFullButton  = new DWindowQuitFullButton;
+        quitFullButton->installEventFilter(q);
+        quitFullButton->setObjectName("DTitlebarDWindowQuitFullscreenButton");
+        quitFullButton->setAccessibleName("DTitlebarDWindowQuitFullscreenButton");
+        quitFullButton->setIconSize(QSize(DefaultTitlebarHeight, DefaultTitlebarHeight));
+        quitFullButton->hide();
+        buttonLayout->addWidget(quitFullButton);
+    }
     buttonLayout->addWidget(closeButton);
 
     rightArea->setWindowFlag(Qt::WindowTransparentForInput);
@@ -245,15 +257,17 @@ void DTitlebarPrivate::init()
     q->setFixedHeight(DefaultTitlebarHeight);
     q->setMinimumHeight(DefaultTitlebarHeight);
 
-    q->connect(quitFullButton, &DWindowQuitFullButton::clicked, q, [ = ]() {
-        bool isFullscreen = targetWindow()->windowState().testFlag(Qt::WindowFullScreen);
-        if (isFullscreen) {
-            targetWindow()->showNormal();
-        } else {
-            targetWindow()->showFullScreen();
-        }
-    });
-    q->connect(optionButton, &DWindowOptionButton::clicked, q, &DTitlebar::optionClicked);
+    if (!DGuiApplicationHelper::isTabletEnvironment()) {
+        q->connect(quitFullButton, &DWindowQuitFullButton::clicked, q, [ = ]() {
+            bool isFullscreen = targetWindow()->windowState().testFlag(Qt::WindowFullScreen);
+            if (isFullscreen) {
+                targetWindow()->showNormal();
+            } else {
+                targetWindow()->showFullScreen();
+            }
+        });
+    }
+    q->connect(optionButton, &DIconButton::clicked, q, &DTitlebar::optionClicked);
     q->connect(DWindowManagerHelper::instance(), SIGNAL(windowMotifWMHintsChanged(quint32)),
                q, SLOT(_q_onTopWindowMotifHintsChanged(quint32)));
     q->connect(DGuiApplicationHelper::instance()->systemTheme(), &DPlatformTheme::iconThemeNameChanged, q, [ = ]() {
@@ -315,12 +329,14 @@ void DTitlebarPrivate::updateFullscreen()
     bool isFullscreen = targetWindow()->windowState().testFlag(Qt::WindowFullScreen);
     auto mainWindow = qobject_cast<DMainWindow *>(targetWindow());
     if (!isFullscreen) {
-        quitFullButton->hide();
+        if (!DGuiApplicationHelper::isTabletEnvironment())
+            quitFullButton->hide();
         mainWindow->setMenuWidget(q);
         showOnFullscreen();
     } else {
         // must set to empty
-        quitFullButton->show();
+        if (!DGuiApplicationHelper::isTabletEnvironment())
+            quitFullButton->show();
         if (mainWindow->menuWidget()) {
             mainWindow->menuWidget()->setParent(nullptr);
             mainWindow->setMenuWidget(Q_NULLPTR);
@@ -360,7 +376,6 @@ void DTitlebarPrivate::updateButtonsState(Qt::WindowFlags type)
     bool showMin = (type.testFlag(Qt::WindowMinimizeButtonHint) || forceShow) && !forceHide;
     minButton->setVisible(showMin);
 
-
     bool allowResize = true;
 
     if (q->window() && q->window()->windowHandle()) {
@@ -371,23 +386,22 @@ void DTitlebarPrivate::updateButtonsState(Qt::WindowFlags type)
     bool showMax = (type.testFlag(Qt::WindowMaximizeButtonHint) || forceShow) && !forceHide && allowResize;
     bool showClose = type.testFlag(Qt::WindowCloseButtonHint) && useDXcb;
     bool showQuit = isFullscreen && useDXcb && fullScreenButtonVisible;
-//    qDebug() << "max:"
-//             << "allowResize" << allowResize
-//             << "useDXcb" << useDXcb
-//             << "forceHide" << forceHide
-//             << "type.testFlag(Qt::WindowMaximizeButtonHint)" << type.testFlag(Qt::WindowMaximizeButtonHint);
     maxButton->setVisible(showMax);
     closeButton->setVisible(showClose);
-    quitFullButton->setVisible(showQuit);
+
+    if (!DGuiApplicationHelper::isTabletEnvironment())
+        quitFullButton->setVisible(showQuit);
+    //    qDebug() << "max:"
+    //             << "allowResize" << allowResize
+    //             << "useDXcb" << useDXcb
+    //             << "forceHide" << forceHide
+    //             << "type.testFlag(Qt::WindowMaximizeButtonHint)" << type.testFlag(Qt::WindowMaximizeButtonHint);
 }
 
 void DTitlebarPrivate::updateButtonsFunc()
 {
     // TASK-18145 (bug-17474) do not setMotifFunctions on wayland
     if (!targetWindowHandle || !qgetenv("WAYLAND_DISPLAY").isEmpty()) {
-        if (!targetWindowHandle) {
-            qWarning() << "Warning: setdisableflags cannot be called when window construction is incomplete!";
-        }
         return;
     }
 
@@ -521,7 +535,7 @@ void DTitlebarPrivate::_q_addDefaultMenuItems()
     D_Q(DTitlebar);
 
     // add switch theme sub menu
-    if (!switchThemeMenu) {
+    if (!switchThemeMenu && DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::Attribute::IsDeepinPlatformTheme)) {
         bool disableDtkSwitchThemeMenu = qEnvironmentVariableIsSet("KLU_DISABLE_MENU_THEME");
         if (!disableDtkSwitchThemeMenu) {
             switchThemeMenu = new QMenu(qApp->translate("TitleBarMenu", "Theme"), menu);
@@ -546,7 +560,8 @@ void DTitlebarPrivate::_q_addDefaultMenuItems()
             themeSeparator = menu->addSeparator();
 
             switchThemeMenu->menuAction()->setVisible(canSwitchTheme);
-            themeSeparator->setVisible(canSwitchTheme);
+
+            themeSeparator->setVisible(DGuiApplicationHelper::isTabletEnvironment() ? false : canSwitchTheme);
         }
     }
 
@@ -569,7 +584,9 @@ void DTitlebarPrivate::_q_addDefaultMenuItems()
     if (!quitAction) {
         quitAction = new QAction(qApp->translate("TitleBarMenu", "Exit"), menu);
         QObject::connect(quitAction, SIGNAL(triggered(bool)), q, SLOT(_q_quitActionTriggered()));
-        menu->addAction(quitAction);
+        if (!DGuiApplicationHelper::isTabletEnvironment()) {
+            menu->addAction(quitAction);
+        }
     }
 }
 

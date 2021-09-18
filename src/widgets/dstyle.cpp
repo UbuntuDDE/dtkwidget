@@ -1228,6 +1228,19 @@ void DStyle::drawControl(const QStyle *style, DStyle::ControlElement ce, const Q
                 dstyle.drawPrimitive(PE_IconButtonIcon, &new_opt, p, w);
             }
 
+            // 有新信息时添加小红点
+            if (w && w->property("_d_dtk_newNotification").toBool()){
+                DPalette pa = DGuiApplicationHelper::instance()->standardPalette(DGuiApplicationHelper::LightType);
+                // 按图标大小50x50时，小红点大小6x6，距离右边和上面8个像素的比例绘制
+                const int redPointRadius = 3;
+                int redPointPadding = (8 * w->size().width() / 50) + redPointRadius;
+                p->setPen(pa.color(DPalette::TextWarning));
+                p->setBrush(pa.color(DPalette::TextWarning));
+                p->setRenderHint(QPainter::Antialiasing);
+                p->drawEllipse(QPointF(w->size().width()-redPointPadding, redPointPadding),
+                               redPointRadius, redPointRadius);
+            }
+
             if (btn->state & State_HasFocus) {
                 if (btn->features & DStyleOptionButton::FloatingButton) {
                     int border_width = dstyle.pixelMetric(PM_FocusBorderWidth, opt, w);
@@ -1339,7 +1352,7 @@ void DStyle::drawControl(const QStyle *style, DStyle::ControlElement ce, const Q
             DStyleHelper dstyle(style);
             const QColor &background = dstyle.getColor(opt, checked ? QPalette::Highlight : QPalette::Button);
             p->setBrush(background);
-            p->setPen(QPen(background, 1));
+            p->setPen(Qt::NoPen);
             int radius = dstyle.pixelMetric(PM_FrameRadius, opt, w);
             int margins = dstyle.pixelMetric(PM_FrameMargins, opt, w);
             DStyleOptionButtonBoxButton::ButtonPosition pos = btn->position;
@@ -1661,7 +1674,7 @@ QIcon DStyle::standardIcon(const QStyle *style, DStyle::StandardPixmap st, const
     Q_UNUSED(widget)
 
 #define CASE_ICON(Value) \
-case SP_##Value: { \
+case static_cast<uint32_t>(SP_##Value): { \
         DStyledIconEngine *icon_engine = new DStyledIconEngine(DDrawUtils::draw##Value, QStringLiteral(#Value)); \
         return QIcon(icon_engine);}
 
@@ -1726,6 +1739,8 @@ case SP_##Value: { \
         return QIcon::fromTheme("password_hide");
     case SP_IndicatorSearch:
         return QIcon::fromTheme("search_indicator");
+    case SP_TitleMoreButton:
+        return QIcon::fromTheme("titlebar_more");
     default:
         break;
     }
@@ -1776,7 +1791,7 @@ int DStyle::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidg
     case SH_ToolTipLabel_Opacity:
         return 255;
     case SH_RequestSoftwareInputPanel:
-        return RSIP_OnMouseClickAndAlreadyFocused;
+        return RSIP_OnMouseClick;
     case SH_ItemView_ScrollMode:
         return QAbstractItemView::ScrollPerPixel;
     case SH_Widget_Animation_Duration:
@@ -1865,15 +1880,6 @@ DStyle::StyleState DStyle::getState(const QStyleOption *option)
     if (option->state.testFlag(DStyle::State_Sunken)) {
         state = DStyle::SS_PressState;
     } else if (option->state.testFlag(DStyle::State_MouseOver)) {
-        // 设置setAttribute(Qt::WA_Hover, false)后
-        // 按钮按下时依旧会存在State_MouseOver状态
-        // 错误的获取了SS_HoverState后的调色板
-        QWidget *widget = qobject_cast<QWidget *>(option->styleObject);
-        if (option->state & State_MouseOver && widget
-                && !widget->testAttribute(Qt::WA_Hover)) {
-            return DStyle::SS_NormalState;
-        }
-
         state = DStyle::SS_HoverState;
     }
 
@@ -2066,7 +2072,7 @@ QSize DStyle::sizeFromContents(QStyle::ContentsType ct, const QStyleOption *opt,
  */
 QIcon DStyle::standardIcon(QStyle::StandardPixmap st, const QStyleOption *opt, const QWidget *widget) const
 {
-    switch (st) {
+    switch (static_cast<uint32_t>(st)) {
         CASE_ICON(TitleBarMenuButton)
         CASE_ICON(TitleBarMinButton)
         CASE_ICON(TitleBarMaxButton)
@@ -2075,7 +2081,6 @@ QIcon DStyle::standardIcon(QStyle::StandardPixmap st, const QStyleOption *opt, c
         CASE_ICON(TitleQuitFullButton)
     case SP_LineEditClearButton:
         return QIcon::fromTheme("button_edit-clear");
-        break;
     default:
         break;
     }
@@ -2763,17 +2768,16 @@ void DStyledIconEngine::paint(QPainter *painter, const QPalette &palette, const 
  */
 void DStyledIconEngine::paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state)
 {
+    Q_UNUSED(mode)
     Q_UNUSED(state)
 
     if (m_painterRole != QPalette::NoRole) {
-        QPalette::ColorGroup cg = (mode == QIcon::Disabled) ? QPalette::Disabled : QPalette::Current;
-
         if (m_widget) {
-            painter->setPen(m_widget->palette().brush(cg, m_painterRole).color());
-            painter->setBrush(m_widget->palette().brush(cg, m_painterRole));
+            painter->setPen(m_widget->palette().brush(m_painterRole).color());
+            painter->setBrush(m_widget->palette().brush(m_painterRole));
         } else {
-            painter->setPen(qApp->palette().brush(cg, m_painterRole).color());
-            painter->setBrush(qApp->palette().brush(cg, m_painterRole));
+            painter->setPen(qApp->palette().brush(m_painterRole).color());
+            painter->setBrush(qApp->palette().brush(m_painterRole));
         }
     }
 

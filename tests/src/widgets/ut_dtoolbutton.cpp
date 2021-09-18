@@ -57,7 +57,6 @@ TEST_F(ut_DToolButton, testDToolButton)
     button->setText(btStr);
     ASSERT_TRUE(button->text() == btStr);
 
-#if DTK_VERSION > DTK_VERSION_CHECK(5, 5, 0, 0)
     Qt::Alignment align[] = {
         Qt::AlignLeft,
         Qt::AlignRight,
@@ -75,5 +74,4 @@ TEST_F(ut_DToolButton, testDToolButton)
         button->setAlignment(al);
         ASSERT_TRUE(button->alignment() == al);
     }
-#endif
 }

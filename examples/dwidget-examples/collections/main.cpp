@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 
     if (!DGuiApplicationHelper::setSingleInstance("deepin-tool-kit-examples")) {
         qDebug() << "another instance is running!!";
+        return 0;
     }
 
     a->setApplicationName("dtk-example");
@@ -55,7 +56,6 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
-    w.titlebar()->setDisableFlags(Qt::WindowMinimizeButtonHint);
 
     Dtk::Widget::moveToCenter(&w);
 
