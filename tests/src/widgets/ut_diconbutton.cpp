@@ -57,10 +57,13 @@ TEST_F(ut_IConButton, testIConButton)
     button->setFlat(true);
     ASSERT_TRUE(button->isFlat());
 
+    QString btStr("aaaaaaaa");
+    button->setText(btStr);
+    ASSERT_TRUE(button->text() == btStr);
 
     button->setEnabledCircle(true);
     ASSERT_TRUE(button->enabledCircle());
 
-    button->setFlat(true);
-    ASSERT_TRUE(button->isFlat());
+    button->setNewNotification(true);
+    ASSERT_TRUE(button->property("_d_dtk_newNotification").toBool());
 }

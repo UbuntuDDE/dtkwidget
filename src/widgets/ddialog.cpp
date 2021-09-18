@@ -29,6 +29,7 @@
 #include <QAction>
 #include <QRegularExpression>
 #include <DFontSizeManager>
+#include <DApplication>
 
 #include "private/ddialog_p.h"
 
@@ -40,33 +41,6 @@
 #include "dtitlebar.h"
 #include "dwarningbutton.h"
 #include "dsuggestbutton.h"
-
-// 字符串为2个字符的非拉丁字符串，中间加上空格
-static bool buttonTextOrigin2Echo(QString &text)
-{
-    if (text.count() == 2 && text.indexOf(QChar::Nbsp) == -1) {
-        for (const QChar &ch : text) {
-            switch (ch.script()) {
-            case QChar::Script_Han:
-            case QChar::Script_Katakana:
-            case QChar::Script_Hiragana:
-            case QChar::Script_Hangul:
-                text.insert(1, QChar::Nbsp);
-                return true;
-            default:
-                break;
-            }
-        }
-    }
-    return false;
-}
-
-static QString buttonTextOrigin2Echo(const QString &text)
-{
-    QString tmp = text;
-    buttonTextOrigin2Echo(tmp);
-    return tmp;
-}
 
 DWIDGET_BEGIN_NAMESPACE
 
@@ -137,6 +111,17 @@ void DDialogPrivate::init()
     contentLayout->setSpacing(0);
     contentLayout->addLayout(textLayout);
 
+    contentWidget = new QWidget;
+    contentWidget->setLayout(contentLayout);
+    DApplication *dapp = qobject_cast<DApplication*>(qApp);
+
+    if (dapp) {
+        contentWidget->setAttribute(Qt::WA_LayoutOnEntireRect, false);
+        contentWidget->setAttribute(Qt::WA_ContentsMarginsRespectsSafeArea, false);
+        contentWidget->setProperty("_dtk_NoTopLevelEnabled", true);
+        qApp->acclimatizeVirtualKeyboard(contentWidget);
+    }
+
     titleBar = new DTitlebar();
     titleBar->setAccessibleName("DDialogTitleBar");
     titleBar->setIcon(icon); //设置标题icon
@@ -151,7 +136,7 @@ void DDialogPrivate::init()
 
     // MainLayout--TopLayout
     mainLayout->addWidget(titleBar, 0, Qt::AlignTop);
-    mainLayout->addLayout(contentLayout);
+    mainLayout->addWidget(contentWidget);
     mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
 
     // MainLayout--ButtonLayout
@@ -631,10 +616,23 @@ void DDialog::insertButton(int index, QAbstractButton *button, bool isDefault)
         setDefaultButton(button);
     }
 
-    // TODO 添加text显示规则处理
-    auto text = button->text();
-    if (buttonTextOrigin2Echo(text))
-        button->setText(text);
+    const QString &text = button->text();
+
+    if (text.count() == 2) {
+        for (const QChar &ch : text) {
+            switch (ch.script()) {
+            case QChar::Script_Han:
+            case QChar::Script_Katakana:
+            case QChar::Script_Hiragana:
+            case QChar::Script_Hangul:
+                break;
+            default:
+                return;
+            }
+        }
+
+        button->setText(QString().append(text.at(0)).append(QChar::Nbsp).append(text.at(1)));
+    }
 }
 
 /*!
@@ -908,8 +906,7 @@ void DDialog::setButtonText(int index, const QString &text)
 {
     QAbstractButton *button = getButton(index);
 
-    // TODO 添加text显示规则处理
-    button->setText(buttonTextOrigin2Echo(text));
+    button->setText(text);
 }
 
 /*!
@@ -1048,29 +1045,19 @@ void DDialog::setOnButtonClickedClose(bool onButtonClickedClose)
 /*!
  * \~chinese \brief 以模态框形式显示当前对话框
  *
- * \~chinese 以 \l{QDialog#Modal Dialogs}{模态框} 形式显示当前对话框，将会阻塞直到用户关闭对话框。
+ * \~chinese 以 \l{QDialog#Modal Dialogs}{模态框} 形式显示当前对话框，将会阻塞直到用户关闭对话框，并返回 \DialogCode 结果。
  *
- * \~chinese onButtonClickedClose()为 true 时返回当前点击按钮的Index，否则返回 \DialogCode 结果。
- *
+ * \sa open(), show(), result(), setWindowModality()
  */
 int DDialog::exec()
 {
     D_D(DDialog);
 
     d->clickedButtonIndex = -1;
-    int clickedIndex = d->clickedButtonIndex;
-
-    if (d->onButtonClickedClose) {
-        // 如果设置了WA_DeleteOnClose属性，那么在exec()中将直接delete this
-        // d->clickedButtonIndex中记录的数据失效，这里通过信号槽更新正确的数据
-        connect(this, &DDialog::buttonClicked, this, [ &clickedIndex ] (int index, const QString &) {
-                clickedIndex = index;
-        });
-    }
 
     int code = DAbstractDialog::exec();
 
-    return clickedIndex >= 0 ? clickedIndex : code;
+    return d->clickedButtonIndex >= 0 ? d->clickedButtonIndex : code;
 }
 
 void DDialog::setCloseButtonVisible(bool closeButtonVisible)

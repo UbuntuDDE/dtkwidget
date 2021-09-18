@@ -7,17 +7,10 @@ CONFIG -= app_bundle
 QT += widgets dtkcore dtkgui testlib
 
 unix:QMAKE_RPATHDIR += $$OUT_PWD/../src
-unix:LIBS += -L$$OUT_PWD/../src -ldtkwidget -lgtest -lglib-2.0
+unix:LIBS += -L$$OUT_PWD/../src -ldtkwidget -lgtest
 
 QMAKE_CXXFLAGS += -fno-access-control
 QMAKE_LFLAGS += -fno-access-control
-
-CONFIG(debug, debug|release) {
-LIBS += -lgtest -lgmock
-QMAKE_CXXFLAGS += -g -Wall -fprofile-arcs -ftest-coverage -fsanitize=address -fsanitize-recover=address -O2
-QMAKE_LFLAGS += -g -Wall -fprofile-arcs -ftest-coverage -fsanitize=address -fsanitize-recover=address -O2
-QMAKE_CXX += -g -fprofile-arcs -ftest-coverage -fsanitize=address -fsanitize-recover=address -O2
-}
 
 # 指定moc文件生成目录和src一样
 MOC_DIR=$$OUT_PWD/../src

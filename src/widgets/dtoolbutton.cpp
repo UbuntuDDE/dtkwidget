@@ -52,14 +52,28 @@ void DToolButton::initStyleOption(QStyleOptionToolButton *option) const
 
 QSize DToolButton::sizeHint() const
 {
-    QSize size = QToolButton::sizeHint();
-    //计算图标文字同时存在时的宽度
-    if (!icon().isNull() && !text().isEmpty()) {
-        QFontMetrics fm = fontMetrics();
-        int textWidth = fm.size(Qt::TextShowMnemonic, text()).width();
-        size.setWidth(size.width() + textWidth);
-    }
-    return size;
+    return QToolButton::sizeHint();
+}
+
+/*!
+ * \~chinese \brief DToolButton::setAlignment 设置DToolButton的对齐方式
+ * \~chinese \param flag Qt::AlignCenter居中对齐　Qt::AlignLeft左对齐　Qt::AlignRight右对齐
+ */
+void DToolButton::setAlignment(Qt::Alignment flag)
+{
+    this->setProperty("_d_dtk_toolButtonAlign", QVariant(flag));
+}
+
+/*!
+ * \~chinese \brief DToolButton::alignment 返回DToolButton当前的对齐方式
+ * \~chinese \return 如果setAlignment设置成功则返回当前对齐方式，否则返回Qt::AlignLeft
+ */
+Qt::Alignment DToolButton::alignment() const
+{
+    if(this->property("_d_dtk_toolButtonAlign").isValid())
+        return static_cast<Qt::Alignment>(this->property("_d_dtk_toolButtonAlign").toInt());
+    else
+        return Qt::AlignLeft;
 }
 
 DWIDGET_END_NAMESPACE

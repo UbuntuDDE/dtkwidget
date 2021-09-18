@@ -1,9 +1,5 @@
 /*
- * Copyright (C) 2021 ~ 2021 Deepin Technology Co., Ltd.
- *
- * Author:     Chen Bin <chenbin@uniontech.com>
- *
- * Maintainer: Chen Bin <chenbin@uniontech.com>
+ * Copyright (C) 2020 ~ 2021 Deepin Technology Co., Ltd.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,15 +14,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <QApplication>
-#include <gtest/gtest.h>
 
-int main(int argc, char *argv[])
+#ifndef DTABLETWINDOWOPTIONBUTTON_H
+#define DTABLETWINDOWOPTIONBUTTON_H
+
+#include <DIconButton>
+
+DWIDGET_BEGIN_NAMESPACE
+
+class LIBDTKWIDGETSHARED_EXPORT DTabletWindowOptionButton : public DIconButton
 {
-    // gerrit编译时没有显示器，需要指定环境变量
-    qputenv("QT_QPA_PLATFORM", "offscreen");
+    Q_OBJECT
+public:
+    DTabletWindowOptionButton(QWidget *parent = 0);
 
-    QApplication app(argc, argv);
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+    QSize sizeHint() const override;
+
+protected:
+    void initStyleOption(DStyleOptionButton *option) const override;
+};
+
+DWIDGET_END_NAMESPACE
+
+#endif // DTABLETWINDOWOPTIONBUTTON_H

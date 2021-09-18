@@ -29,7 +29,8 @@
 #include <DFileChooserEdit>
 #include <DSpinBox>
 #include <DSlider>
-#include <DLineEdit>
+#include <DPaletteHelper>
+#include "dprintpreviewwidget.h"
 
 #include "dprintpreviewdialog.h"
 #include "dprintpreviewdialog_p.h"
@@ -216,79 +217,79 @@ TEST_F(ut_DPrintPreviewDialog, testSetfrmaeback)
 {
     DFrame *printerFrame = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(printerFrame);
-    DPalette pa = DApplicationHelper::instance()->palette(printerFrame);
+    DPalette pa = DPaletteHelper::instance()->palette(printerFrame);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *copycountFrame = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(copycountFrame);
-    pa = DApplicationHelper::instance()->palette(copycountFrame);
+    pa = DPaletteHelper::instance()->palette(copycountFrame);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *pageFrame = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(pageFrame);
-    pa = DApplicationHelper::instance()->palette(pageFrame);
+    pa = DPaletteHelper::instance()->palette(pageFrame);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *colorframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(colorframe);
-    pa = DApplicationHelper::instance()->palette(colorframe);
+    pa = DPaletteHelper::instance()->palette(colorframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *marginsframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(marginsframe);
-    pa = DApplicationHelper::instance()->palette(marginsframe);
+    pa = DPaletteHelper::instance()->palette(marginsframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *paperframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(paperframe);
-    pa = DApplicationHelper::instance()->palette(paperframe);
+    pa = DPaletteHelper::instance()->palette(paperframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *duplexframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(duplexframe);
-    pa = DApplicationHelper::instance()->palette(duplexframe);
+    pa = DPaletteHelper::instance()->palette(duplexframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *sidebysideframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(sidebysideframe);
-    pa = DApplicationHelper::instance()->palette(sidebysideframe);
+    pa = DPaletteHelper::instance()->palette(sidebysideframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *watermarkframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(watermarkframe);
-    pa = DApplicationHelper::instance()->palette(watermarkframe);
+    pa = DPaletteHelper::instance()->palette(watermarkframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *posframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(posframe);
-    pa = DApplicationHelper::instance()->palette(posframe);
+    pa = DPaletteHelper::instance()->palette(posframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *inclinatframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(inclinatframe);
-    pa = DApplicationHelper::instance()->palette(inclinatframe);
+    pa = DPaletteHelper::instance()->palette(inclinatframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *sizeframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(sizeframe);
-    pa = DApplicationHelper::instance()->palette(sizeframe);
+    pa = DPaletteHelper::instance()->palette(sizeframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 
     DFrame *opaframe = new DFrame(test_dialog_d->basicsettingwdg);
     test_dialog_d->setfrmaeback(opaframe);
-    pa = DApplicationHelper::instance()->palette(opaframe);
+    pa = DPaletteHelper::instance()->palette(opaframe);
 
     ASSERT_EQ(pa.base().color(), pa.itemBackground().color());
 }
@@ -1641,9 +1642,9 @@ TEST_F(ut_DPrintPreviewDialog, testDuplexCheckBox)
     // TODO: duplexCheckBox
 }
 
-TEST_F(ut_DPrintPreviewDialog, testDApplicationHelper_instance)
+TEST_F(ut_DPrintPreviewDialog, themeTypeChanged)
 {
-    DApplicationHelper::instance()->themeTypeChanged(DGuiApplicationHelper::LightType);
+    DGuiApplicationHelper::instance()->themeTypeChanged(DGuiApplicationHelper::LightType);
 
-    DApplicationHelper::instance()->themeTypeChanged(DGuiApplicationHelper::DarkType);
+    DGuiApplicationHelper::instance()->themeTypeChanged(DGuiApplicationHelper::DarkType);
 }
